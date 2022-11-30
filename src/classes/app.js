@@ -1,122 +1,119 @@
 const Milliseconds = require('../constants/milliseconds');
 const config = require('config');
-const { get, pick } = require('lodash');
+const { pick } = require('lodash');
 const Logger = require('./logger');
 const RfidReader = require('./rfid-reader');
 const Gate = require('./gate');
 const AccessController = require('./access-controller');
 const EventHandler = require('./event-handler');
 const Api = require('./api');
-const MockData = require('./mock-data');
+const Buzzer = require('./buzzer');
+const MockReader = require('./mock-reader');
+const KeysListRetriever = require('./keys-list-retriever');
+const MockApi = require('./mock-api');
+const KeyDetector = require('./key-detector');
+const ENVIRONMENTS = require('../constants/environments');
 
 class App {
+    onStartEventHandler;
     logger;
-    keyReader;
-    gate;
-    lockTimer;
-    handlers = {};
-    config = {};
+    keysListRetriever;
+    accessController;
+    keyDetector;
 
-    constructor ({
-        keyReader,
-        logger,
-        accessController,
-        accessAttemptHandler,
-        gateKeysRetriever,
-    }) {
-        this.handlers = {
-            logger,
-            keyReader,
-            accessController,
-            accessAttemptHandler,
-            gateKeysRetriever
-        };
-
-        this.config = {
-            ...config,
-            keyReadIntervalDelay: get(config, 'keyReadIntervalDelay', Milliseconds.Second),
-            keysRetrievalIntervalDelay: get(config, 'keysRetrievalIntervalDelay', Milliseconds.Hour),
-        };
+    constructor () {
+        this.onStartEventHandler = new EventHandler();
+        this.logger = Logger.create();
+        this.keysListRetriever = new KeysListRetriever();
+        this.accessController = new AccessController();
+        this.keyDetector = new KeyDetector();
 
         const loggedConfigs = ['keyReadIntervalDelay', 'lockDelay', 'env', 'gateId', 'apiUrl'];
-        this.handlers.logger?.info('App > Created with Config:', pick(this.config, loggedConfigs));
+        this.logger.info('App Created with Config:', pick(config, loggedConfigs));
+
+        this.keysListRetriever.onKeysListRetrieved(keys => {
+            this.logger.info('Keys List Retrieved:', keys);
+            this.accessController.setKeys(keys);
+        });
+
+        this.keyDetector.onKeyDetected(keyId => {
+            this.accessController.attempt(keyId);
+        });
+
+        this.accessController.onAttempt(attempt => {
+            this.logger.info('Attempt:', attempt);
+        });
+
+        this.keysListRetriever.onError(error => {
+            this.logger.info('Error retrieving keys:', error.message);
+        });
+        
+    }
+
+    onStart (handler) {
+        this.onStartEventHandler.addHandler(handler);
     }
 
     start () {
-        this.handlers.logger?.info('App > Starting...');
+        this.logger.info('Starting...');
         const {
             keyReadIntervalDelay,
             keysRetrievalIntervalDelay
-        } = config
-        setInterval(() => this.checkForKey(), keyReadIntervalDelay);
-        setInterval(() => this.retrieveAuthorizedKeys(), keysRetrievalIntervalDelay);
-        setTimeout(() => this.retrieveAuthorizedKeys(), Milliseconds.Second);
-        this.handlers.logger?.info('App > Started!');
-    }
-
-    async checkForKey () {
-        const keyId = await this.handlers.keyReader();
-        if (!keyId) {
-            return;
-        }
-        const attempt = this.handlers.accessController?.createAttempt(keyId);
-        this.handlers.logger?.info('App > Access Attempt:', attempt);
-        this.handlers.accessAttemptHandler?.handleEvent(attempt);
-    }
-
-    async retrieveAuthorizedKeys () {
-        this.handlers.logger?.info('App > retrieveAuthorizedKeys');
-        try {
-            const gateKeys = await this.handlers.gateKeysRetriever();
-            this.handlers.logger?.info('App > retrieveAuthorizedKeys > Received:', gateKeys);
-            this.handlers.accessController?.setKeys(gateKeys);
-        } catch (err) {
-            this.handlers.logger?.error('App > retrieveAuthorizedKeys > Error', err);
-        }
+        } = config;
+        setInterval(() => this.keyDetector.detectKey(), keyReadIntervalDelay);
+        setInterval(() => this.keysListRetriever.retrieveKeysList(), keysRetrievalIntervalDelay);
+        setTimeout(() => this.keysListRetriever.retrieveKeysList(), Milliseconds.Second);
+        this.onStartEventHandler.publish();
     }
 
     static createMockApp () {
-        const logger = Logger.create();
-        const mockData = new MockData();
-        return new App({
-            logger,
-            keyReader: () => mockData.readKey(),
-            accessController: new AccessController(),
-            accessAttemptHandler: new EventHandler(),
-            gateKeysRetriever: () => mockData.getGateKeys()
-        });
+        const app = new App();
+        const reader = new MockReader();
+        const api = new MockApi();
+
+        reader.setKeys(api.allKeys);
+        app.keyDetector.onDetectKey(() => reader.readKey());
+        app.keysListRetriever.onKeysListRetrieve(() => api.retrieveGateKeys());
+        return app;
     }
 
     static createDevApp () {
-        const logger = Logger.create();
+        const app = new App();
+        const reader = new MockReader();
+        const mockApi = new MockApi();
         const api = new Api();
-        const mockData = new MockData();
-        return new App({
-            logger,
-            keyReader: () => mockData.readKey(),
-            accessController: new AccessController(),
-            gateKeysRetriever: () => api.retrieveGateKeys(logger),
-            accessAttemptHandler: new EventHandler([
-                (a) => api.sendAttempt(a, logger),
-            ]),
-        });
+
+        reader.setKeys(mockApi.allKeys);
+        app.keyDetector.onDetectKey(() => reader.readKey());
+        app.keysListRetriever.onKeysListRetrieve(() => api.retrieveGateKeys());
+        app.accessController.onAttempt(attempt => api.sendAttempt(attempt));
+        api.onSendAttemptError(error => app.logger.info('Error sending attempt:', error.message));
+        return app;
+    }
+   
+    static createProdApp () {
+        const app = new App();
+        const reader = new RfidReader();
+        const gate = new Gate();
+        const buzzer = new Buzzer();
+        const api = new Api();
+
+        app.keyDetector.onDetectKey(() => reader.readKey());
+        app.keysListRetriever.onKeysListRetrieve(() => api.retrieveGateKeys());
+        app.accessController.onAttempt(attempt => api.sendAttempt(attempt));
+        app.accessController.onAttempt(() => buzzer.beep());
+        app.accessController.onGranted(() => gate.unlock());
+        api.onSendAttemptError(error => app.logger.info('Error sending attempt:', error.message));
+        return app;
     }
 
-    static createProdApp () {
-        const gate = new Gate();
-        const api = new Api();
-        const logger = Logger.create();
-        const rfidReader = new RfidReader();
-        return new App({
-            logger,
-            keyReader: () => rfidReader.readKey(),
-            accessController: new AccessController(),
-            gateKeysRetriever: () => api.retrieveGateKeys(logger),
-            accessAttemptHandler: new EventHandler([
-                (a) => gate.handleAttempt(a),
-                (a) => api.sendAttempt(a, logger),
-            ])
-        });
+    static createApp () {
+        const { env } = config;
+        switch(env) {
+            case ENVIRONMENTS.MOCK: return this.createMockApp();
+            case ENVIRONMENTS.DEVELOPMENT: return this.createDevApp();
+            default: return this.createProdApp();
+        }
     }
 }
 

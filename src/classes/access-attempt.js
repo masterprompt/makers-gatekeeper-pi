@@ -8,7 +8,6 @@ class AccessAttempt {
         this.keyId = keyId;
         this.result = result;
     }
-
 }
 
 module.exports = AccessAttempt;

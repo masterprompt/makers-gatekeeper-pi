@@ -1,11 +1,11 @@
 class EventHandler {
     handlers = [];
 
-    constructor (handlers = []) {
-        this.handlers = handlers;
+    addHandler (handler) {
+        this.handlers.push(handler);
     }
 
-    handleEvent (...args) {
+    publish (...args) {
         this.handlers.forEach(handler => handler(...args));
     }
 }

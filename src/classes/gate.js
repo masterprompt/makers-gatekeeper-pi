@@ -3,17 +3,6 @@ const config = require('config');
 
 class Gate {
     lockTimer;
-    handler;
-
-    constructor(handler) {
-        this.handler = handler;
-    }
-
-    handleAttempt (attempt) {
-        if (attempt.result) {
-            this.unlock();
-        }
-    }
 
     lock() {
     }

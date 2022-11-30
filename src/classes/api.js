@@ -1,31 +1,37 @@
 const config = require('config');
 const axios = require('axios');
+const EventHandler = require('./event-handler');
 
 const callback = () => {}
 
 class Api {
-    async retrieveGateKeys (logger) {
+    onSendAttemptErrorEventHandler;
+
+    constructor () {
+        this.onSendAttemptErrorEventHandler = new EventHandler();
+    }
+
+    async retrieveGateKeys () {
         const { apiUrl, apiGateKeys, gateId, gateSecret } = config;
         const headers = { secret: gateSecret };
-        try {
-            const response = await axios.get(`${apiUrl}${apiGateKeys}`.replace(':gateId', gateId), { headers });
-            return response.data;
-        } catch (err) {
-            logger.info('Error Retrieving Gate Keys:', err.message)
-        }
-        return [];
+        const response = await axios.get(`${apiUrl}${apiGateKeys}`.replace(':gateId', gateId), { headers });
+        return response.data;
         
     }
 
-    async sendAttempt (attempt, logger) {
+    async sendAttempt (attempt) {
         const { apiUrl, apiGateAttempts, gateId, gateSecret } = config;
         const headers = { secret: gateSecret };
         try {
-            await axios.post(`${apiUrl}${apiGateAttempts}`.replace(':gateId', gateId), attempt, { headers });
+            axios.post(`${apiUrl}${apiGateAttempts}`.replace(':gateId', gateId), attempt, { headers });
         } catch (err) {
-            logger.info('Error Sending Attempt:', err.message)
+            this.onSendAttemptErrorEventHandler.publish(err);
         }
-        return;
+        
+    }
+
+    onSendAttemptError (handler) {
+        this.onSendAttemptErrorEventHandler.addHandler(handler);
     }
 }
 
