@@ -1,0 +1,44 @@
+{
+  "name": "makers-gatekeeper-pi",
+  "version": "0.0.1",
+  "description": "Gatekeeper Raspberry Pi client for Maker Cloud",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "env-cmd -f .env node ./src/index.js"
+  },
+  "engines": {
+    "npm": ">=18.12.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/masterprompt/makers-gatekeeper-pi.git"
+  },
+  "keywords": [
+    "Makerspace",
+    "Makers",
+    "Raspberry",
+    "Pi",
+    "Gatekeeper"
+  ],
+  "author": "Casey Kerr",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/masterprompt/makers-gatekeeper-pi/issues"
+  },
+  "homepage": "https://github.com/masterprompt/makers-gatekeeper-pi#readme",
+  "dependencies": {
+    "axios": "^1.2.0",
+    "config": "^3.3.8",
+    "env-cmd": "^10.1.0",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.4",
+    "rpi-softspi": "^1.0.5",
+    "rpio": "^2.4.2",
+    "simple-node-logger": "^21.8.12",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.3.1"
+  }
+}
