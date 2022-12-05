@@ -38,7 +38,7 @@ class RaspberryPiRfidReader {
         }
 
         const response = this.getUid();
-        if (response.status === Status.OK && onKeyCallback) {
+        if (response.status === Status.OK) {
           const id = this.createUid(response.data);
           return id;
         }
