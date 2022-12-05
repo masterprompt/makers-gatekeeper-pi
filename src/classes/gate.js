@@ -1,5 +1,6 @@
 const Milliseconds = require('../constants/milliseconds');
 const config = require('config');
+const { get } = require('lodash');
 
 class Gate {
     lockTimer;
