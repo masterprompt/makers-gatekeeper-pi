@@ -66,7 +66,7 @@ class App {
         this.intervals.push(setTimeout(() => this.keysListRetriever.retrieveKeysList(), Milliseconds.Second));
         this.onStartEventHandler.publish();
         process.on('SIGINT',() => {
-            console.log('\nExisting...');
+            console.log('\nExiting...');
             this.intervals.forEach(interval => clearInterval(interval));
             process.exit();
         });
