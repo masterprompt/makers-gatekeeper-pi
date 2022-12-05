@@ -28,7 +28,7 @@ class Beeper {
 			rpio.write(this.pin, 1);
 			setTimeout(() => rpio.write(this.pin, 0), beepDuration);
 		}
-		setInterval(() => beepCycle(), beepDuration + beepDelay);
+		beepInterval = setInterval(() => beepCycle(), beepDuration + beepDelay);
 	}
 
 
