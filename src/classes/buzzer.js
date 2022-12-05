@@ -29,7 +29,7 @@ class Buzzer {
                 isCycleEnded = true;
               } else {
                 isCycleEnded = false;
-                this.alert();
+                this.beep();
               }
 
             }, 80);
