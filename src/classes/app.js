@@ -98,6 +98,7 @@ class App {
         const buzzer = new Buzzer();
         const api = new Api();
 
+        app.onStart(() => buzzer.beep());
         app.keyDetector.onDetectKey(() => reader.readKey());
         app.keysListRetriever.onKeysListRetrieve(() => api.retrieveGateKeys());
         app.accessController.onAttempt(attempt => api.sendAttempt(attempt));

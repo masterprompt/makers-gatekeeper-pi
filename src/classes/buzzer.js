@@ -14,13 +14,14 @@ class Buzzer {
 
 
     beep() {
-        if (this.buzzer_pin) {
+      console.log('beep');
+        if (this.pin) {
           setTimeout(() => {
 
-            rpio.write(this.buzzer_pin, 1);
+            rpio.write(this.pin, 1);
 
             setTimeout(() => {
-              rpio.write(this.buzzer_pin, 0);
+              rpio.write(this.pin, 0);
 
               BUZZERCount++;
               if (BUZZERCount == 3) {
