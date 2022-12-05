@@ -95,14 +95,14 @@ class App {
         const app = new App();
         const reader = new RfidReader();
         const gate = new Gate();
-        const Beeper = new Beeper();
+        const beeper = new Beeper();
         const api = new Api();
 
-        app.onStart(() => Beeper.beep2(2));
+        app.onStart(() => beeper.beep2(2));
         app.keyDetector.onDetectKey(() => reader.readKey());
         app.keysListRetriever.onKeysListRetrieve(() => api.retrieveGateKeys());
         app.accessController.onAttempt(attempt => api.sendAttempt(attempt));
-        app.accessController.onAttempt(() => Beeper.beep());
+        app.accessController.onAttempt(() => beeper.beep());
         app.accessController.onGranted(() => gate.unlock());
         api.onSendAttemptError(error => app.logger.info('Error sending attempt:', error.message));
         return app;
