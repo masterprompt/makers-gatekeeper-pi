@@ -7,7 +7,7 @@ const Gate = require('./gate');
 const AccessController = require('./access-controller');
 const EventHandler = require('./event-handler');
 const Api = require('./api');
-const Buzzer = require('./buzzer');
+const Beeper = require('./beeper');
 const MockReader = require('./mock-reader');
 const KeysListRetriever = require('./keys-list-retriever');
 const MockApi = require('./mock-api');
@@ -95,14 +95,14 @@ class App {
         const app = new App();
         const reader = new RfidReader();
         const gate = new Gate();
-        const buzzer = new Buzzer();
+        const Beeper = new Beeper();
         const api = new Api();
 
-        app.onStart(() => buzzer.beep());
+        app.onStart(() => Beeper.beep2(2));
         app.keyDetector.onDetectKey(() => reader.readKey());
         app.keysListRetriever.onKeysListRetrieve(() => api.retrieveGateKeys());
         app.accessController.onAttempt(attempt => api.sendAttempt(attempt));
-        app.accessController.onAttempt(() => buzzer.beep());
+        app.accessController.onAttempt(() => Beeper.beep());
         app.accessController.onGranted(() => gate.unlock());
         api.onSendAttemptError(error => app.logger.info('Error sending attempt:', error.message));
         return app;
