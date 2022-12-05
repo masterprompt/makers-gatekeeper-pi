@@ -20,6 +20,7 @@ class App {
     keysListRetriever;
     accessController;
     keyDetector;
+    intervals = [];
 
     constructor () {
         this.onStartEventHandler = new EventHandler();
@@ -60,10 +61,15 @@ class App {
             keyReadIntervalDelay,
             keysRetrievalIntervalDelay
         } = config;
-        setInterval(() => this.keyDetector.detectKey(), keyReadIntervalDelay);
-        setInterval(() => this.keysListRetriever.retrieveKeysList(), keysRetrievalIntervalDelay);
-        setTimeout(() => this.keysListRetriever.retrieveKeysList(), Milliseconds.Second);
+        this.intervals.push(setInterval(() => this.keyDetector.detectKey(), keyReadIntervalDelay));
+        this.intervals.push(setInterval(() => this.keysListRetriever.retrieveKeysList(), keysRetrievalIntervalDelay));
+        this.intervals.push(setTimeout(() => this.keysListRetriever.retrieveKeysList(), Milliseconds.Second));
         this.onStartEventHandler.publish();
+        process.on('SIGINT',() => {
+            console.log('\nExisting...');
+            this.intervals.forEach(interval => clearInterval(interval));
+            process.exit();
+        });
     }
 
     static createMockApp () {
