@@ -31,9 +31,22 @@ class Beeper {
 		beepInterval = setInterval(() => beepCycle(), beepDuration + beepDelay);
 	}
 
+	beep (retries = 0) {
+		if (!retries) {
+			return;
+		}
+		rpio.write(this.pin, 1);
+		setTimeout(() => {
+			rpio.write(this.pin, 0);
+			setTimeout(() => {
+				this.beep(retries - 1);
+			}, beepDelay);
+		}, beepDuration);
+	}
 
 
-    beep() {
+
+    beep3() {
       console.log('beep');
         if (this.pin) {
           	setTimeout(() => {

@@ -102,8 +102,9 @@ class App {
         app.keyDetector.onDetectKey(() => reader.readKey());
         app.keysListRetriever.onKeysListRetrieve(() => api.retrieveGateKeys());
         app.accessController.onAttempt(attempt => api.sendAttempt(attempt));
-        app.accessController.onAttempt(() => beeper.beep());
+        app.accessController.onGranted(() => beeper.beep(1));
         app.accessController.onGranted(() => gate.unlock());
+        app.accessController.onDenied(() => beeper.beep(2));
         api.onSendAttemptError(error => app.logger.info('Error sending attempt:', error.message));
         return app;
     }
