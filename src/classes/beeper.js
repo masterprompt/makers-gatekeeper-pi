@@ -1,74 +1,38 @@
 const rpio = require('rpio');
+const PiGpioOutput = require('./pi-gpio-output');
 
-let BUZZERCount = 1;
-const beepDuration = 80;
-const beepDelay = 180;
-
-class Beeper {
-    
-    pin = 18;
+class Beeper extends PiGpioOutput {
+    enabled = false;
+	beepDuration = 80;
+	beepDelay = 180;
+    //pin = 18;
 
     constructor () {
+		super(18);
+		this.enabled = true;
+		/*
         rpio.open(this.pin, rpio.OUTPUT);
         rpio.write(this.pin, rpio.LOW);
 
         //  Ensure we turn off buzzer if program stops
         process.on('SIGINT',() => rpio.write(this.pin, 0));
+		*/
     }
-
-	beep2 (beepCountMax = 1) {
-		let beepCount = 0;
-		let beepInterval;
-
-		const beepCycle = () => {
-			beepCount++;
-			if (beepCount>=beepCountMax) {
-				clearInterval(beepInterval);
-			}
-			rpio.write(this.pin, 1);
-			setTimeout(() => rpio.write(this.pin, 0), beepDuration);
-		}
-		beepInterval = setInterval(() => beepCycle(), beepDuration + beepDelay);
-	}
 
 	beep (retries = 0) {
-		if (!retries) {
+		if (!retries || !this.enabled) {
 			return;
 		}
-		rpio.write(this.pin, 1);
+		//rpio.write(this.pin, 1);
+		this.on();
 		setTimeout(() => {
-			rpio.write(this.pin, 0);
+			//rpio.write(this.pin, 0);
+			this.off();
 			setTimeout(() => {
 				this.beep(retries - 1);
-			}, beepDelay);
-		}, beepDuration);
+			}, this.beepDelay);
+		}, this.beepDuration);
 	}
-
-
-
-    beep3() {
-      console.log('beep');
-        if (this.pin) {
-          	setTimeout(() => {
-
-            	rpio.write(this.pin, 1);
-
-            	setTimeout(() => {
-              		rpio.write(this.pin, 0);
-
-              		BUZZERCount++;
-              		if (BUZZERCount == 3) {
-                		BUZZERCount = 1;
-              		} else {
-                		this.beep();
-              		}
-
-            	}, beepDuration);
-
-
-          	}, beepDelay);
-        }
-    }
 }
 
 module.exports = Beeper;
