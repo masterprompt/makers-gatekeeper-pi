@@ -12,6 +12,7 @@ const MockReader = require('./mock-reader');
 const KeysListRetriever = require('./keys-list-retriever');
 const MockApi = require('./mock-api');
 const KeyDetector = require('./key-detector');
+const ReadyIndicator = require('./ready-indicator');
 const ENVIRONMENTS = require('../constants/environments');
 
 class App {
@@ -103,10 +104,12 @@ class App {
         const gate = new Gate();
         const beeper = new Beeper();
         const api = new Api();
+        const readyIndicator = new ReadyIndicator();
 
         app.onStart(() => beeper.beep(2));
         app.keyDetector.onDetectKey(() => reader.readKey());
         app.keysListRetriever.onKeysListRetrieve(() => api.retrieveGateKeys());
+        app.keysListRetriever.onKeysListRetrieved(() => readyIndicator.on());
         app.accessController.onAttempt(attempt => api.sendAttempt(attempt));
         app.accessController.onGranted(() => beeper.beep(1));
         app.accessController.onGranted(() => gate.unlock());

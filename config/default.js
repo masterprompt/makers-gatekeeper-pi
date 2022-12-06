@@ -8,6 +8,7 @@ module.exports = {
     env: ENVIRONMENTS.PRODUCTION,
     logDir: 'logs',
     lockDelay: Milliseconds.Second * 5,
+    gatePin: 13,
     keyReadIntervalDelay: Milliseconds.Second,
     keysRetrievalIntervalDelay: Milliseconds.Hour,
     apiGateKeys: '/api/v1/gates/:gateId/keys',
@@ -15,5 +16,5 @@ module.exports = {
     beeperPin: 18,
     beepDuration: 80,
     beepDelay: 180,
-    
+    readyPin: 11,    
 }

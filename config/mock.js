@@ -4,4 +4,7 @@ const Milliseconds = require('../src/constants/milliseconds');
 module.exports = {
     env: ENVIRONMENTS.MOCK,
     keysRetrievalIntervalDelay: Milliseconds.Minute,
+    beeperPin: undefined,
+    gatePin: undefined,
+    readyPin: undefined,
 }
