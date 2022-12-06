@@ -1,32 +1,23 @@
-const rpio = require('rpio');
 const PiGpioOutput = require('./pi-gpio-output');
+const config = require('config');
+const { get } = require('lodash');
 
 class Beeper extends PiGpioOutput {
-    enabled = false;
 	beepDuration = 80;
 	beepDelay = 180;
-    //pin = 18;
 
     constructor () {
-		super(18);
-		this.enabled = true;
-		/*
-        rpio.open(this.pin, rpio.OUTPUT);
-        rpio.write(this.pin, rpio.LOW);
-
-        //  Ensure we turn off buzzer if program stops
-        process.on('SIGINT',() => rpio.write(this.pin, 0));
-		*/
+		super({ pin: get(config, 'beeperPin'), enabled: true });
+		this.beepDuration = get(config, 'beepDuration', 80);
+		this.beepDelay = get(config, 'beepDelay', 180);
     }
 
 	beep (retries = 0) {
-		if (!retries || !this.enabled) {
+		if (!retries) {
 			return;
 		}
-		//rpio.write(this.pin, 1);
 		this.on();
 		setTimeout(() => {
-			//rpio.write(this.pin, 0);
 			this.off();
 			setTimeout(() => {
 				this.beep(retries - 1);
