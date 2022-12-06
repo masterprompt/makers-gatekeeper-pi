@@ -104,7 +104,7 @@ class App {
         const beeper = new Beeper();
         const api = new Api();
 
-        app.onStart(() => beeper.beep2(2));
+        app.onStart(() => beeper.beep(2));
         app.keyDetector.onDetectKey(() => reader.readKey());
         app.keysListRetriever.onKeysListRetrieve(() => api.retrieveGateKeys());
         app.accessController.onAttempt(attempt => api.sendAttempt(attempt));
