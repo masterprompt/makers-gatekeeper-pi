@@ -12,5 +12,4 @@ MAKER_GATE_ID=<Your Gate ID>
 MAKER_GATE_SECRET=<Your gate secret>
 #  Without ENV it will run production by default
 NODE_ENV=dev
-MAKER_GATE_API=http://localhost:8081/dev
 ```

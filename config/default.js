@@ -4,7 +4,7 @@ const Milliseconds = require('../src/constants/milliseconds');
 module.exports = {
     gateId: process.env.MAKER_GATE_ID,
     gateSecret: process.env.MAKER_GATE_SECRET,
-    apiUrl: process.env.MAKER_GATE_API,
+    apiUrl: process.env.MAKER_GATE_API || 'https://gatekeeper-api.tangatek.ne',
     env: ENVIRONMENTS.PRODUCTION,
     logDir: 'logs',
     lockDelay: Milliseconds.Second * 5,
