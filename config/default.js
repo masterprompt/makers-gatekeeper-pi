@@ -10,7 +10,7 @@ module.exports = {
     lockDelay: Milliseconds.Second * 5,
     gatePin: 13,
     keyReadIntervalDelay: Milliseconds.Second,
-    keysRetrievalIntervalDelay: Milliseconds.Hour,
+    keysRetrievalIntervalDelay: Milliseconds.Minute * 15,
     apiGateKeys: '/api/v1/gates/:gateId/keys',
     apiGateAttempts: '/api/v1/gates/:gateId/key-log',
     beeperPin: 18,
