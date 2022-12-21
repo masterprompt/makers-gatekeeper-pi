@@ -13,7 +13,7 @@ module.exports = {
     keysRetrievalIntervalDelay: Milliseconds.Minute * 15,
     apiGateKeys: '/api/v1/gates/:gateId/keys',
     apiGateAttempts: '/api/v1/gates/:gateId/key-log',
-    beeperPin: 18,
+    beeperPin: 15,
     beepDuration: 80,
     beepDelay: 180,
     readyPin: 11,    
